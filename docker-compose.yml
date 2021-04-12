@@ -1,0 +1,53 @@
+version: '3'
+
+networks: 
+    laravel:
+
+services: 
+    lara_nginx: 
+        image: nginx:1.19.9
+        container_name: Laravel_Nginx
+        ports : 
+            - "9080:80"
+        volumes: 
+            - ./:/var/www/html
+            - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+        depends_on: 
+            - lara_php
+            - lara_mysql
+        networks: 
+            - laravel
+
+    lara_mysql:
+        container_name: Laravel_Mysql
+        image: mysql
+        restart: always
+        tty: true
+        ports:
+            - "9306:3306"
+        volumes:
+            - ./docker/mysql:/var/lib/mysql
+        environment: 
+            MYSQL_DATABASE: laratest
+            MYSQL_USER: lara_root
+            MYSQL_PASSWORD: secret
+            MYSQL_ROOT_PASSWORD: secret
+            SERVICE_TAGS: dev
+            SERVICE_NAME: mysql
+        networks: 
+            - laravel
+
+    lara_php:
+        container_name: Laravel_PHP_FPM
+        build: 
+            context: ./docker/php
+            dockerfile: Dockerfile
+        ports:
+            - "9000:9000"
+        volumes: 
+            - ./:/var/www/html
+        networks: 
+            - laravel
+        
+
+        
